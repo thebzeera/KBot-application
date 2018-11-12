@@ -190,7 +190,7 @@ def cosine_sentence_similarity(sentence1, sentence2):
     :param sentence2:
     :return:
     """
-    print("cosine similarity")
+    # print("cosine similarity")
     sent1 = sentence1
     sent2 = sentence2
 
@@ -227,7 +227,7 @@ def sentence_similarity(sentence1, sentence2):
     score, count = 0.0, 0
 
     for synset in synsets1:
-        print("synset simmilarity")
+        # print("synset simmilarity")
 
         high = [synset.path_similarity(ss) for ss in synsets2 if synset.path_similarity(ss) != None]
         best_score = 0
@@ -246,7 +246,7 @@ def sentence_similarity(sentence1, sentence2):
 
     if score == 0:
         score = cosine_sentence_similarity(sent1, sent2)
-        print("cosinescore",score)
+        # print("cosinescore",score)
 
 
     return score
@@ -386,15 +386,12 @@ def get_all_frameworks(query):
                 {
                     "$addToSet": {"query_list": data['query'].lower()}
                 })
-
             # print(query,"/||||||| query|||||")
             # if data['query'].isalnum():
             #     data['query']="what is "+data['query']
-            print(data['query'], "rrrr")
+            # print(data['query'], "rrrr")
             lower_query = query.lower()
-
             iter_n = int(lower_query[-1])
-            # print(ite)
             name = lower_query[:-1]
             ''' 
             checker = spellcheck_c.min_edit_distance(name)
@@ -441,9 +438,9 @@ def get_all_frameworks(query):
             # print(symmetric_sentence_similarity(name, paras[5]))
             for b in paralist:
                 mylist = paras[b]
-                print("mylist",mylist)
+                # print("mylist",mylist)
                 if len(mylist) > 10:
-                    print(mylist)
+                    # print(mylist)
                     score = symmetric_sentence_similarity(name, mylist)
                     # print("SCOREprint",b,score,mylist)
                     if score > best1:
@@ -466,8 +463,6 @@ def get_all_frameworks(query):
             print('para2 is:', para2)
             print('para3 is:', para3)
             score = symmetric_sentence_similarity(name, paras[0])
-            print("sadist",score)
-
             if para3==0 and para2==0 and para==0 and score==0:
                 para2=1
                 para3=2
@@ -476,9 +471,6 @@ def get_all_frameworks(query):
                 para3=para2+1
             elif para3==0 and score==0:
                 para3=para2+1
-
-
-
             output1 = []
             output1.append(paras[para])
             # if para!=0:
