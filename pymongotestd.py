@@ -4,6 +4,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from flask_cors import CORS
 from flask import Flask, jsonify, request, send_from_directory
 from flask_pymongo import PyMongo
+from fuzzywuzzy import fuzz
+from spell_checker import correction
 # from flask_socketio import SocketIO
 import bson
 import json
@@ -73,6 +75,8 @@ def paraclust(texts, query):
     number_of_seeds_to_try = 50
     max_iter = 300
     number_of_process = 1
+    from sklearn.cluster import MeanShift
+    # model = MeanShift(bandwidth=2,n_jobs=number_of_process).fit(X)
     model = KMeans(n_clusters=n_clusters, max_iter=max_iter, n_init=number_of_seeds_to_try, n_jobs=number_of_process,
                    random_state=1234).fit(X)
 
@@ -153,7 +157,12 @@ cluster = Cluster(doclist, cdict, ddict, tfidf[0], tfidf[1])
 # print(v)
 
 def symmetric_sentence_similarity(sentence1, sentence2):
-    return (sentence_similarity(sentence1, sentence2) + sentence_similarity(sentence2, sentence1))
+    return (fussymatch(sentence1, sentence2))
+
+def fussymatch(sentence1, sentence2):
+    return fuzz.token_set_ratio(sentence1, sentence2)
+
+        # return (sentence_similarity(sentence1, sentence2) + sentence_similarity(sentence2, sentence1))
 
 
 def penn_to_wn(tag):
@@ -357,7 +366,7 @@ def printer():
 global flag
 
 
-@app.route('/input/<query>', methods=['POST'])
+# @app.route('/input/<query>', methods=['POST'])
 @app.route('/input/<query>', methods=['POST'])
 def get_all_frameworks(query):
     try:
@@ -418,8 +427,7 @@ def get_all_frameworks(query):
             paralist = paraclust(paras, name)
             print("paralist", paralist)
             # exit()
-
-            global doc_id
+            # global doc_id
             doc_id = IDs[iter_n]
             print(doc_id)
 
@@ -473,14 +481,16 @@ def get_all_frameworks(query):
                 para3=para2+1
             output1 = []
             output1.append(paras[para])
+            output1.append(paras[para2])
+            output1.append(paras[para3])
             # if para!=0:
             #
             #     output1.append(paras[para2])
             #     if para3 != 0:
             #         output1.append(paras[para3])
-            if para != 0:
-                output1.append(paras[para2])
-                output1.append(paras[para3])
+            # if para != 0:
+            #     output1.append(paras[para2])
+            #     output1.append(paras[para3])
 
             print('output1 is:', output1[0])
             ##output=[]
@@ -602,8 +612,6 @@ def download_file():
         # path = os.path.dirname(os.path.realpath(filename))
         # p = path + '\data'
         # print(p)
-
-
         # directory = os.path
         # print(directory)
         # print(os.path.join(app.instance_path, ''))
@@ -611,6 +619,18 @@ def download_file():
 
         #
         return send_from_directory(full_path, filename, as_attachment=True)
+
+@app.route('/inputs/<query>', methods=['GET'])
+def spellchecker(query):
+    # print(query,"fgdf")
+    # print(correction(query),"vvvv")
+
+
+    return correction(query)
+
+
+
+
 
 
 if __name__ == '__main__':
