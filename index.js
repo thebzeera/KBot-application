@@ -295,8 +295,9 @@ function spellCheckJS(correctedQueryList)
          else
          {
 //         alert(correctedQueryList[1])
-
-                $('<div class="didYouMean"><figure class="avatar"><img src="dribbble-01_1x.jpg" /></figure>'+ "Did you mean   "+correctedQueryList[1]  + '<span class="yes">'+ yes + '<span class="No">'+ No + '</span><div class="votestamp"><div docId ="'+ correctedQueryList[1]+'" rel_loc = "0"  msg="'+msg+'" id="'+ correctedQueryList[1]+ '0" class="sprite sprite-fa-thumbs-up-grey" > '+'</div></div>').appendTo($('.mCSB_container')).addClass('new');
+                alert(correctedQueryList[0])
+                $('<div class="sad" ></div>')
+                $('<div class="didYouMean"><figure class="avatar"><img src="dribbble-01_1x.jpg" /></figure>'+ "Search for ["+'<span class="yes">'+correctedQueryList[1] +'</span>'+"] Instead of ["+ '<span class="no">'+ +correctedQueryList[0]+"]"+'</span>' +'<span class="No">'+ No + '</span><div class="votestamp"><div docId ="'+ correctedQueryList[1]+'" rel_loc = "0"  msg="'+msg+'" id="'+ correctedQueryList[1]+ '0" class="sprite sprite-fa-thumbs-up-grey" > '+'</div></div>').appendTo($('.mCSB_container')).addClass('new');
 //            alert(correctedQueryList[0])
                 updateScrollbar();
                 $("span.yes").on('click',function()
