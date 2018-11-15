@@ -622,11 +622,22 @@ def download_file():
 
 @app.route('/inputs/<query>', methods=['GET'])
 def spellchecker(query):
-    # print(query,"fgdf")
-    # print(correction(query),"vvvv")
+    listBoth={}
 
+    print(request.query_string)
+    json = request.args.getlist('dataa')
+    print(json)
+    for i in json:
+        query=i
+    # # print(query,"fgdf")
+    # # print(correction(query),"vvvv")
 
-    return correction(query)
+    corrected=correction(query)
+    print(query," is corrected to ",corrected)
+    if (corrected==query):
+        return jsonify(query,query)
+    else:
+        return jsonify(query,corrected)
 
 
 

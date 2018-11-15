@@ -12,25 +12,25 @@ var username=prompt('Enter username')
 // var socket = io.connect('http://127.0.0.1:5000');
 // socket.emit('username', username)
 var out_l;
+var yes=" [Yes]"
+var No=" [NO]"
 var txt=" [More]";
 var nxt=" [Next doc match]";
 var welcome_text="Hello, how can I help you,";
 var download="[download]";
 var filename='something.txt';
-var votingBool=true;
+//var votingBool=true;
 //var count=0;
 
 //var count =0;
 
-var $messages = $('.messages-content'),
-  d, h, m,
-  i=0;
+
+var $messages = $('.messages-content'),  d, h, m,i=0;
   $(window).load(function() {
 
     $messages.mCustomScrollbar();
     welcome(username,welcome_text);
 });
-
 
   // socket.on('imageConversionByServer', function(data) {
 
@@ -57,8 +57,49 @@ function setDate(){
   }
 }
 
-function insertMessage() {
+
+function spellCheck() {
   msg = $('.message-input').val();
+  window.count=0;
+  window.query_count=0;
+  var flag=0
+  $.ajax({
+            type    : "GET",
+            url     : "http://127.0.0.1:5000/inputs/"+msg,
+            data    : {'dataa':msg},
+            dataType: "json",
+            traditional: true,
+            success : function(data)
+                        {
+//                        alert("did you mean "+data)
+                        $('.message.loading').remove();
+                        spellCheckJS(data)
+                        },
+            error   : function (data)
+                        {
+                        $('.message.loading').remove();
+                        spellCheckJS(data);
+                        }
+         },
+        console.log(msg)
+        );
+  // socket.emit('input', msg,flag,username)
+  if ($.trim(msg) == '')
+      {
+        return false;
+      }
+  $('<div class="message message-personal">' + msg + '</div>').appendTo($('.mCSB_container')).addClass('new');
+  setDate();
+  $('.message-input').val(null);
+  $('<div class="message loading new"><figure class="avatar"><img src="dribbble-01_1x.jpg" /></figure><span></span></div>').appendTo($('.mCSB_container'));
+  updateScrollbar();
+//  setTimeout(function() {
+//  }, 1000 + (Math.random() * 20) * 100);
+}
+
+
+function insertMessage() {
+  msg = $('.message-input89').val();
   window.count=0;
   window.query_count=0;
   var flag=0
@@ -93,8 +134,16 @@ function insertMessage() {
   }, 1000 + (Math.random() * 20) * 100);
 }
 
+//--------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
+//$('.message-submit').click(function() {
+//  insertMessage();
+//});
+//--------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
+
 $('.message-submit').click(function() {
-  insertMessage();
+  spellCheck();
 });
 
 $(window).on('keydown', function(e) {
@@ -133,19 +182,19 @@ $(window).on('keydown', function(e) {
 
 //
 
-function voting(rel_para,rel_loc, doc_id,msg){
-console.log(rel_para,"rel para")
-console.log(rel_loc)
-if(votingBool){
+//function voting(rel_para,rel_loc, doc_id,msg){
+//console.log(rel_para,"rel para")
+//console.log(rel_loc)
 
 
 
-  $('<div class="votestamp"><div docId ="'+ doc_id+'" rel_loc = "'+ rel_loc+'"  msg="'+msg+'" id="'+ doc_id+ rel_loc+'" class="sprite sprite-fa-thumbs-up-grey" > '+'</div>').appendTo($('.message.chat-response-cont'));
+
 //    rel_loc = $(this).attr( "rel_loc" );
 //    console.log(rel_loc,"hdfgvjd")
 
 
 $(".sprite-fa-thumbs-up-grey").click(function(){
+alert('e');
       var re1_para=[0,0,0]
 
     rel_loc = $(this).attr( "rel_loc" );
@@ -155,7 +204,7 @@ $(".sprite-fa-thumbs-up-grey").click(function(){
     console.log(id,"iddd")
     docId = $(this).attr( "docId" );
     console.log(docId,"doc")
-    rel_para[rel_loc]+=1;
+    rel_para[rel_loc]=1;
     console.log(rel_para,"reee")
     $.ajax({
       type: "POST",
@@ -167,8 +216,7 @@ $(".sprite-fa-thumbs-up-grey").click(function(){
       console.log('data sent')
     }
     );
-    }
-    }
+
 
 
 //
@@ -205,12 +253,120 @@ function welcome(username,welcome_text){
   updateScrollbar();
 }
 
+function spellCheckJS(correctedQueryList)
+    {
+//        alert(correctedQueryList[1])
 
-function fakeMessage(output1,doc_id) {
-  updateScrollbar();
-  if ($('.message-input').val() != '') {
-    return false;
-  }
+        updateScrollbar();
+        if (correctedQueryList[0]=='')
+            {
+                return false;
+            }
+        var result = correctedQueryList[1].localeCompare(correctedQueryList[0]);
+//        alert(result)
+        if (result==0)
+            {
+            updateScrollbar();
+//              alert("query and corrected are same")
+              msg = correctedQueryList[0]
+              window.count=0;
+              window.query_count=0;
+              var flag=0
+             $.ajax({
+                    type: "POST",
+
+                    url: "http://127.0.0.1:5000/input/"+msg+flag,
+                    data: JSON.stringify("{'username':'" + username+"','query':'"+msg+"'}"),
+                    dataType: 'json',
+                    success: function(data){
+                      $('.message.loading').remove();
+                      fakeMessage(data)
+                    },
+                    error: function (data){
+                          $('.message.loading').remove();
+                          fakeMessage(data);
+                    }
+                    },
+                    console.log(msg,flag)
+                 );
+
+
+            }
+         else
+         {
+//         alert(correctedQueryList[1])
+
+                $('<div class="didYouMean"><figure class="avatar"><img src="dribbble-01_1x.jpg" /></figure>'+ "Did you mean   "+correctedQueryList[1]  + '<span class="yes">'+ yes + '<span class="No">'+ No + '</span><div class="votestamp"><div docId ="'+ correctedQueryList[1]+'" rel_loc = "0"  msg="'+msg+'" id="'+ correctedQueryList[1]+ '0" class="sprite sprite-fa-thumbs-up-grey" > '+'</div></div>').appendTo($('.mCSB_container')).addClass('new');
+//            alert(correctedQueryList[0])
+                updateScrollbar();
+                $("span.yes").on('click',function()
+                    {
+
+//                        alert("You selection is Yes")
+                            updateScrollbar();
+                          msg = correctedQueryList[1]
+                          window.count=0;
+                          window.query_count=0;
+                          var flag=0
+                         $.ajax({
+                                type: "POST",
+
+                                url: "http://127.0.0.1:5000/input/"+msg+flag,
+                                data: JSON.stringify("{'username':'" + username+"','query':'"+msg+"'}"),
+                                dataType: 'json',
+                                success: function(data){
+                                  $('.message.loading').remove();
+                                  fakeMessage(data)
+                                },
+                                error: function (data){
+                                      $('.message.loading').remove();
+                                      fakeMessage(data);
+                                }
+                                },
+                                console.log(msg,flag)
+                             );
+                    });
+
+              $("span.No").on('click',function()
+                    {
+//                        alert("your selection is no")
+                        updateScrollbar();
+                        msg = correctedQueryList[0]
+                          window.count=0;
+                          window.query_count=0;
+                          var flag=0
+                         $.ajax({
+                                type: "POST",
+
+                                url: "http://127.0.0.1:5000/input/"+msg+flag,
+                                data: JSON.stringify("{'username':'" + username+"','query':'"+msg+"'}"),
+                                dataType: 'json',
+                                success: function(data){
+                                  $('.message.loading').remove();
+                                  fakeMessage(data)
+                                },
+                                error: function (data){
+                                      $('.message.loading').remove();
+                                      fakeMessage(data);
+                                }
+                                },
+                                console.log(msg,flag)
+                             );
+                    });
+//                }
+
+        console.log(output1)
+    }}
+
+
+
+function fakeMessage(output1,doc_id)
+    {
+        updateScrollbar();
+        if ($('.message-input').val() != '')
+            {
+                return false;
+            }
   $('<div class="message loading new"><figure class="avatar"><img src="dribbble-01_1x.jpg" /></figure><span></span></div>').appendTo($('.mCSB_container'));
   console.log(doc_id,"docid");
 //  window.output1[1]
@@ -220,7 +376,7 @@ function fakeMessage(output1,doc_id) {
   console.log(output1[0],"len")
   if (output1[0]== "Oops ! Sorry, I am unable to answer to this query. ")
   {
-    votingBool=false;
+//    votingBool=false;
     Fake=JSON.stringify(output1[0].replace(/(\r\n|\n|\r)/gm," "));
     console.log(Fake)
      $('<div class="message new"><figure class="avatar"><img src="dribbble-01_1x.jpg" /></figure>'+ Fake +'</div>').appendTo($('.mCSB_container')).addClass('new');
@@ -258,31 +414,31 @@ function fakeMessage(output1,doc_id) {
 
       if(out_l>2){
 
-        $('<div class="message new more-first chat-response-cont"><figure class="avatar"><img src="dribbble-01_1x.jpg" /></figure>'+ Fake + '<span class="more-first ">'+ txt + '</span></div>').appendTo($('.mCSB_container')).addClass('new');
-        $('<div class="message new more-second chat-response-cont dispNone"><figure class="avatar"><img src="dribbble-01_1x.jpg" /></figure>'+ Fake2 + '<span class="more2">'+ txt + '</span></div>').appendTo($('.mCSB_container')).addClass('new');
-        $('<div class="message new next-div chat-response-cont dispNone"><figure class="avatar"><img src="dribbble-01_1x.jpg" /></figure>'+ Fake3 + '<span class="next-span">'+ nxt + '</span><span class="download-span" docId="'+ output1[1]+'">'+ download + '</span> </div>').appendTo($('.mCSB_container')).addClass('new');
-
+        $('<div class="message new more-first chat-response-cont"><figure class="avatar"><img src="dribbble-01_1x.jpg" /></figure>'+ Fake + '<span class="more-first ">'+ txt + '</span><div class="votestamp"><div docId ="'+ output1[1]+'" rel_loc = "0"  msg="'+msg+'" id="'+ output1[1]+ '0" class="sprite sprite-fa-thumbs-up-grey" > '+'</div></div>').appendTo($('.mCSB_container')).addClass('new');
+        $('<div class="message new more-second chat-response-cont dispNone"><figure class="avatar"><img src="dribbble-01_1x.jpg" /></figure>'+ Fake2 + '<span class="more2">'+ txt + '</span><div class="votestamp"><div docId ="'+ output1[1]+'" rel_loc = "1"  msg="'+msg+'" id="'+ output1[1]+ '1" class="sprite sprite-fa-thumbs-up-grey" > '+'</div></div>').appendTo($('.mCSB_container')).addClass('new');
+        $('<div class="message new next-div chat-response-cont dispNone"><figure class="avatar"><img src="dribbble-01_1x.jpg" /></figure>'+ Fake3 + '<span class="next-span">'+ nxt + '</span><span class="download-span" docId="'+ output1[1]+'">'+ download + '</span><div class="votestamp"><div docId ="'+ output1[1]+'" rel_loc = "2"  msg="'+msg+'" id="'+ output1[1]+ '2" class="sprite sprite-fa-thumbs-up-grey" > '+'</div></div>').appendTo($('.mCSB_container')).addClass('new');
+//        votingBool=true;
+$('').appendTo($('.message.chat-response-cont'));
          theta=0;
-        votingBool=true;
-        voting(alpha,theta,output1[1],msg);
+//        voting(alpha,theta,output1[1],msg);
         console.log('Voting completed + more loaded')
         updateScrollbar();
 
         $("span.more-first").on('click',function(){
           theta=1;
-          votingBool=true;
-          voting(alpha,theta,output1[1],msg);
+//          votingBool=true;
+//          voting(alpha,theta,output1[1],msg);
           updateScrollbar();
-          $("div.more-second").removeClass("dispNone")
+          $(this).parent().next().removeClass("dispNone")
           console.log('Voting completed+more1');
             });
 
           $("div.more-second span.more2").on('click',function(){
             theta=2;
             votingBool=true;
-            voting(alpha,theta,output1[1],msg);
+//            voting(alpha,theta,output1[1],msg);
             updateScrollbar();
-        $("div.next-div").removeClass("dispNone")
+        $(this).parent().next().removeClass("dispNone")
         console.log('Voting completed+more2');
         });
 
@@ -339,7 +495,7 @@ function fakeMessage(output1,doc_id) {
         console.log('in else')
         var theta=0;
         var alpha=[0,0,0]
-        voting(alpha,theta,output1[1],msg);
+//        voting(alpha,theta,output1[1],msg);
         updateScrollbar();
         $("next").on('click',function(click){
           $('<div class="message loading new"><figure class="avatar"><img src="dribbble-01_1x.jpg" /></figure><span></span></div>').appendTo($('.mCSB_container'));
